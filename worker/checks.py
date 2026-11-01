@@ -15,12 +15,18 @@ from urllib.parse import urlparse
 import httpx
 from cryptography import x509
 
+# Some sites (e.g. Wikipedia) return 403 to the default "python-httpx/x.y" agent.
+# A named agent with a contact URL is what their bot policies ask for.
+USER_AGENT = "pingboard/0.1 (+https://github.com/hnrydvd/pingboard)"
+
 
 def check_http(url, timeout=10.0):
     """GET the URL and return status code and latency. Never raises."""
     start = time.monotonic()
     try:
-        resp = httpx.get(url, timeout=timeout, follow_redirects=True)
+        resp = httpx.get(
+            url, timeout=timeout, follow_redirects=True, headers={"User-Agent": USER_AGENT}
+        )
     except httpx.HTTPError as exc:
         return {"ok": False, "status_code": None, "latency_ms": None, "error": str(exc)}
     latency_ms = int((time.monotonic() - start) * 1000)
