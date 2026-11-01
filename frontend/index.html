@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pingboard</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #ddd; }
+    .up { color: #137333; } .down { color: #c5221f; } .unknown { color: #777; }
+  </style>
+</head>
+<body>
+  <h1>pingboard</h1>
+  <table>
+    <thead><tr><th>Target</th><th>Status</th><th>HTTP</th><th>Latency</th><th>Cert days</th><th>Checked</th></tr></thead>
+    <tbody id="rows"><tr><td colspan="6">Loading…</td></tr></tbody>
+  </table>
+  <!-- TODO: form to add a target (POST /api/targets) -->
+  <script>
+    async function load() {
+      const rows = document.getElementById("rows");
+      try {
+        const data = await (await fetch("/api/status")).json();
+        rows.innerHTML = "";
+        for (const t of data) {
+          const tr = document.createElement("tr");
+          const state = t.ok === null ? "unknown" : t.ok ? "up" : "down";
+          const cells = [t.name, state.toUpperCase(), t.status_code ?? "–",
+            t.latency_ms != null ? t.latency_ms + " ms" : "–", t.cert_days_left ?? "–",
+            t.checked_at ? new Date(t.checked_at).toLocaleTimeString() : "never"];
+          cells.forEach((v, i) => {
+            const td = document.createElement("td");
+            td.textContent = v;
+            if (i === 1) td.className = state;
+            if (i === 0) td.title = t.url;
+            tr.appendChild(td);
+          });
+          rows.appendChild(tr);
+        }
+      } catch (e) {
+        rows.innerHTML = `<tr><td colspan="6">API unreachable</td></tr>`;
+      }
+    }
+    load();
+    setInterval(load, 10000);
+  </script>
+</body>
+</html>
