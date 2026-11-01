@@ -68,14 +68,35 @@ def check_tls(url, timeout=10.0):
 
 
 def check_dns(url):
-    """TODO (weeks 1-2): resolve the hostname with socket.getaddrinfo and
-    return the addresses, or an error string. Time it too."""
-    return None
+    """Resolve the URL's hostname. Returns addresses (IPv4 and IPv6), lookup time,
+    and an error string if it didn't resolve. Never raises.
+
+    getaddrinfo has no timeout argument; it uses the system resolver's
+    (see /etc/resolv.conf in the container).
+    """
+    host = urlparse(url).hostname
+    if not host:
+        return {"addresses": [], "dns_ms": None, "dns_error": "no hostname in URL"}
+
+    start = time.monotonic()
+    try:
+        # SOCK_STREAM so each address comes back once, not once per socket type
+        infos = socket.getaddrinfo(host, None, type=socket.SOCK_STREAM)
+    except socket.gaierror as exc:
+        return {"addresses": [], "dns_ms": None, "dns_error": str(exc)}
+    dns_ms = int((time.monotonic() - start) * 1000)
+
+    # dict.fromkeys dedupes but keeps resolver order
+    addresses = list(dict.fromkeys(info[4][0] for info in infos))
+    return {"addresses": addresses, "dns_ms": dns_ms, "dns_error": None}
 
 
 def run_all(url, timeout=10.0):
+    # DNS first: after the HTTP request the OS resolver cache makes dns_ms meaningless
+    dns = check_dns(url)
     result = check_http(url, timeout)
     result["cert_days_left"] = check_tls(url, timeout)
+    result.update(dns)
     return result
 
 
