@@ -4,6 +4,7 @@
 """
 
 import json
+import math
 import socket
 import ssl
 import sys
@@ -12,6 +13,7 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import httpx
+from cryptography import x509
 
 
 def check_http(url, timeout=10.0):
@@ -31,17 +33,38 @@ def check_http(url, timeout=10.0):
 
 
 def check_tls(url, timeout=10.0):
-    """Return days until the server's TLS certificate expires, or None for plain http.
+    """Return whole days until the server's TLS certificate expires.
 
-    TODO (weeks 1-2): implement.
-      - Open a socket to (host, port 443) with ssl.create_default_context().wrap_socket(...)
-      - getpeercert()["notAfter"] -> parse with ssl.cert_time_to_seconds()
-      - Return whole days left. Decide what to do with a cert that fails verification
-        (try https://expired.badssl.com).
+    Negative means already expired. None for plain http or if we can't connect.
+
+    Verification is deliberately off here: check_http already reports whether the
+    cert is valid, and with verification on, an expired cert raises before we can
+    read its expiry date. With it off, getpeercert() returns an empty dict, so we
+    take the raw DER bytes and parse them with `cryptography`.
     """
-    if urlparse(url).scheme != "https":
+    parsed = urlparse(url)
+    if parsed.scheme != "https" or not parsed.hostname:
         return None
-    return None
+    host, port = parsed.hostname, parsed.port or 443
+
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+
+    try:
+        with socket.create_connection((host, port), timeout=timeout) as sock:
+            # server_hostname sends SNI, so shared hosts return the right cert
+            with ctx.wrap_socket(sock, server_hostname=host) as tls:
+                der = tls.getpeercert(binary_form=True)
+    except (OSError, ssl.SSLError):
+        return None
+    if not der:
+        return None
+
+    not_after = x509.load_der_x509_certificate(der).not_valid_after_utc
+    seconds_left = (not_after - datetime.now(timezone.utc)).total_seconds()
+    # floor, not int(): a cert that expired 2 hours ago is -1 days, not 0
+    return math.floor(seconds_left / 86400)
 
 
 def check_dns(url):
