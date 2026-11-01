@@ -44,7 +44,7 @@ python checks.py https://example.com https://expired.badssl.com
 
 ## Roadmap for this repo (Nov–Dec 2026)
 
-- [ ] **Weeks 1-2:** finish `check_tls` and `check_dns` in `worker/checks.py`; handle timeouts and bad certs cleanly
+- [x] **Weeks 1-2:** finish `check_tls` and `check_dns` in `worker/checks.py`; handle timeouts and bad certs cleanly
 - [ ] **Weeks 3-4:** multi-stage Dockerfiles; record image sizes before and after below
 - [ ] **Weeks 5-6:** scheduler + Redis queue + multiple workers; add-target form; worker metrics
 - [ ] **Weeks 7-8:** deploy on EC2 behind an ALB with a Route53 name; nightly `pg_dump` to S3

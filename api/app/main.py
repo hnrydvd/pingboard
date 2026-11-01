@@ -78,7 +78,8 @@ def status():
             """
             SELECT DISTINCT ON (t.id)
                    t.id, t.name, t.url, r.checked_at, r.ok,
-                   r.status_code, r.latency_ms, r.cert_days_left, r.error
+                   r.status_code, r.latency_ms, r.cert_days_left,
+                   r.addresses, r.dns_ms, r.dns_error, r.error
             FROM targets t
             LEFT JOIN results r ON r.target_id = t.id
             ORDER BY t.id, r.checked_at DESC NULLS LAST

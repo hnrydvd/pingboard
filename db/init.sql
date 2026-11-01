@@ -16,6 +16,9 @@ CREATE TABLE results (
     status_code     INT,
     latency_ms      INT,
     cert_days_left  INT,
+    addresses       TEXT[],
+    dns_ms          INT,
+    dns_error       TEXT,
     error           TEXT
 );
 

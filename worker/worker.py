@@ -25,9 +25,11 @@ def run_once(conn):
     for target_id, url in targets:
         r = run_all(url, TIMEOUT)
         conn.execute(
-            """INSERT INTO results (target_id, ok, status_code, latency_ms, cert_days_left, error)
-               VALUES (%s, %s, %s, %s, %s, %s)""",
-            (target_id, r["ok"], r["status_code"], r["latency_ms"], r["cert_days_left"], r["error"]),
+            """INSERT INTO results (target_id, ok, status_code, latency_ms, cert_days_left,
+                                      addresses, dns_ms, dns_error, error)
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+            (target_id, r["ok"], r["status_code"], r["latency_ms"], r["cert_days_left"],
+             r["addresses"], r["dns_ms"], r["dns_error"], r["error"]),
         )
         log.info("checked %s ok=%s status=%s latency_ms=%s", url, r["ok"], r["status_code"], r["latency_ms"])
     conn.commit()
