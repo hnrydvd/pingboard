@@ -1,4 +1,4 @@
-"""Check functions. Also runnable on their own for the weeks 1-2 exercise:
+"""Check functions. Also runnable on their own:
 
     python checks.py https://example.com https://expired.badssl.com
 """
