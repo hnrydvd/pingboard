@@ -1,4 +1,4 @@
-# Starter single-stage image. Week 3-4 exercise:
+# Starter single-stage image. Phase 2 exercise:
 #   1. `docker image ls` and note the size.
 #   2. Convert to a multi-stage build (build wheels in stage 1, copy into a slim stage 2).
 #   3. Compare sizes and layer counts (`docker history`), and write the numbers in the README.

@@ -28,7 +28,7 @@ class TargetIn(BaseModel):
 
 # --- Health -----------------------------------------------------------------
 # Liveness: the process is up. Readiness: it can actually serve (DB reachable).
-# These become the k8s livenessProbe / readinessProbe in Phase 2.
+# These become the k8s livenessProbe / readinessProbe in Phase 3.
 
 @app.get("/healthz")
 def healthz():
