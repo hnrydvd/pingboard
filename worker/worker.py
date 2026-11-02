@@ -1,6 +1,6 @@
 """pingboard worker: checks every target on an interval and stores results.
 
-TODO (weeks 5-6): split into a scheduler that pushes target IDs onto a Redis list
+TODO (Phase 2): split into a scheduler that pushes target IDs onto a Redis list
 and N workers that BLPOP from it. That gives you something to scale with HPA later.
 """
 

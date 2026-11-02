@@ -2,7 +2,7 @@
 
 A small uptime and TLS-certificate monitor. A worker checks a list of URLs on a schedule, stores the results in Postgres, and a status page shows what's up, what's down, and which certs are close to expiring.
 
-It's also the app I'm carrying through a year of DevOps practice: Compose → AWS → Kubernetes → Terraform → CI/CD and GitOps → observability.
+It's also the app I'm carrying through a year of DevOps practice: Compose → AWS → Terraform basics → Kubernetes → CI/CD and GitOps → observability.
 
 ## Architecture
 
@@ -11,7 +11,7 @@ browser ──► frontend (nginx) ──/api──► api (FastAPI) ──► P
                                                            ▲
                          worker (Python) ── checks ────────┘
                               │
-                            Redis (queue, coming in weeks 5-6)
+                            Redis (queue, coming in Phase 2)
 ```
 
 | Service | Port | Notes |
@@ -42,13 +42,18 @@ pip install -r requirements.txt
 python checks.py https://example.com https://expired.badssl.com
 ```
 
-## Roadmap for this repo (Nov–Dec 2026)
+## Roadmap for this repo (Nov 2026–Oct 2027)
 
-- [x] **Weeks 1-2:** finish `check_tls` and `check_dns` in `worker/checks.py`; handle timeouts and bad certs cleanly
-- [ ] **Weeks 3-4:** multi-stage Dockerfiles; record image sizes before and after below
-- [ ] **Weeks 5-6:** scheduler + Redis queue + multiple workers; add-target form; worker metrics
-- [ ] **Weeks 7-8:** deploy on EC2 behind an ALB with a Route53 name; nightly `pg_dump` to S3
-- [ ] Later: Helm chart (Phase 2), Terraform + CI + Argo CD (Phase 3), Prometheus SLO alerts (Phase 4)
+No new work is planned here for Nov–Dec 2026, while Linux and the RHCSA come first.
+
+- [x] **Done:** finish `check_tls` and `check_dns` in `worker/checks.py`; handle timeouts and bad certs cleanly
+- [ ] **Phase 2 (Jan–Mar 2027):** multi-stage Dockerfiles; record image sizes before and after below
+- [ ] **Phase 2:** scheduler + Redis queue + multiple workers; add-target form; worker metrics
+- [ ] **Phase 2:** deploy on EC2 by hand behind an ALB with a Route53 name; nightly `pg_dump` to S3
+- [ ] **Phase 2 (Feb–Mar):** rebuild the EC2 deployment in Terraform
+- [ ] **Phase 3 (Apr–Jun):** Helm chart
+- [ ] **Phase 4 (Jul–Aug):** Terraform for VPC + EKS; CI; Argo CD
+- [ ] **Phase 5 (Sep–Oct):** Prometheus SLO alerts
 
 ## Image sizes
 
