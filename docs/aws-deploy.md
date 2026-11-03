@@ -1,6 +1,6 @@
-# AWS deploy notes (Phase 2)
+# AWS deploy notes
 
-Do it by hand in the console first and write down every step here. Later in Phase 2 (Feb–Mar) this file becomes the spec for the Terraform code.
+Do it by hand in the console first and write down every step here. Later this file becomes the spec for the Terraform code.
 
 **Before anything else:** set a billing alarm (Billing → Budgets, e.g. $20/month, email alert).
 
