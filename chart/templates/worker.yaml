@@ -1,0 +1,33 @@
+# One replica only: every worker checks every target, so more would duplicate results.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  labels:
+    app: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+        - name: worker
+          image: "{{ .Values.image.repository }}-worker:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: pingboard-db
+                  key: database-url
+            - name: CHECK_INTERVAL_SECONDS
+              value: {{ .Values.worker.checkIntervalSeconds | quote }}
+            - name: CHECK_TIMEOUT_SECONDS
+              value: {{ .Values.worker.checkTimeoutSeconds | quote }}
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}

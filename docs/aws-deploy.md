@@ -10,7 +10,7 @@ Do it by hand in the console first and write down every step here. Later this fi
 - [ ] VPC: 2 public subnets in different AZs (the ALB needs two)
 - [ ] Security groups: ALB allows 80/443 from the internet; EC2 allows 8080 from the ALB SG only, 22 from my IP only
 - [ ] EC2: small instance, install Docker + Compose, `docker compose up -d`
-- [ ] ALB: target group → EC2:8080, health check path `/` (later: `/api/healthz` via nginx)
+- [ ] ALB: target group → EC2:8080, health check path `/` (later: `/api/status` via nginx, which also exercises the API and DB)
 - [ ] Route53: `pingboard.<my-domain>` → ALB alias record
 - [ ] ACM cert on the ALB for HTTPS
 - [ ] S3 bucket + instance role (not access keys!) allowing `s3:PutObject`; cron `pg_dump | gzip | aws s3 cp - s3://...`
