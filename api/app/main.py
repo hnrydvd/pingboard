@@ -1,6 +1,7 @@
 """pingboard API: manages targets and serves check results."""
 
 import os
+from urllib.parse import urlsplit
 
 import psycopg
 from fastapi import FastAPI, HTTPException
@@ -17,7 +18,6 @@ targets_created = Counter("pingboard_targets_created_total", "Targets added via 
 
 
 def db():
-    # TODO: swap for a connection pool (psycopg_pool) once you load-test this.
     return psycopg.connect(DATABASE_URL, row_factory=dict_row)
 
 
@@ -47,6 +47,16 @@ def readyz():
 
 # --- Targets ----------------------------------------------------------------
 
+def is_checkable(url):
+    """True for an http(s) URL with a hostname and a valid port."""
+    try:
+        parts = urlsplit(url)
+        parts.port  # raises ValueError if out of range
+    except ValueError:
+        return False
+    return parts.scheme in ("http", "https") and bool(parts.hostname)
+
+
 @app.get("/api/targets")
 def list_targets():
     with db() as conn:
@@ -55,17 +65,18 @@ def list_targets():
 
 @app.post("/api/targets", status_code=201)
 def create_target(target: TargetIn):
-    # TODO: validate the URL scheme (http/https only).
-    with db() as conn:
-        row = conn.execute(
-            "INSERT INTO targets (name, url) VALUES (%s, %s) RETURNING *",
-            (target.name, target.url),
-        ).fetchone()
+    if not is_checkable(target.url):
+        raise HTTPException(status_code=422, detail="url must be http or https with a hostname")
+    try:
+        with db() as conn:
+            row = conn.execute(
+                "INSERT INTO targets (name, url) VALUES (%s, %s) RETURNING *",
+                (target.name, target.url),
+            ).fetchone()
+    except psycopg.errors.UniqueViolation:
+        raise HTTPException(status_code=409, detail="url already exists")
     targets_created.inc()
     return row
-
-
-# TODO: DELETE /api/targets/{id}
 
 
 # --- Results ----------------------------------------------------------------
@@ -85,6 +96,3 @@ def status():
             ORDER BY t.id, r.checked_at DESC NULLS LAST
             """
         ).fetchall()
-
-
-# TODO: GET /api/targets/{id}/results?limit=100 for a history view.

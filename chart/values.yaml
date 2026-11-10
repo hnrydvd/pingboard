@@ -1,0 +1,48 @@
+# Images are named <repository>-api, <repository>-worker and <repository>-frontend.
+# Locally they come from `kind load docker-image`, so pullPolicy must not be Always.
+image:
+  repository: pingboard
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+api:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 96Mi
+    limits:
+      memory: 256Mi
+
+frontend:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      memory: 64Mi
+
+worker:
+  checkIntervalSeconds: 60
+  checkTimeoutSeconds: 10
+  resources:
+    requests:
+      cpu: 50m
+      memory: 96Mi
+    limits:
+      memory: 256Mi
+
+db:
+  image: postgres:17-alpine
+  name: pingboard
+  user: pingboard
+  # Local throwaway value. This file is public: never put a real password here.
+  password: change-me
+  storage: 1Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
